@@ -2,3 +2,5 @@ streamlit
 folium
 shapely
 streamlit-folium
+pandas
+plotly
