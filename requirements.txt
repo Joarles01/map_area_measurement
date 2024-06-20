@@ -6,3 +6,4 @@ pandas
 plotly
 fpdf
 geopy
+geopandas
