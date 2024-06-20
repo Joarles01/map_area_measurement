@@ -2,6 +2,15 @@ import streamlit as st
 import folium
 from streamlit_folium import st_folium
 from shapely.geometry import Polygon
+import pandas as pd
+import plotly.express as px
+
+# Incluir o CSS personalizado
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+local_css("styles.css")
 
 st.title("Map Area Measurement App")
 
@@ -36,3 +45,19 @@ if len(st.session_state["points"]) >= 3:
     polygon = Polygon(st.session_state["points"])
     area = polygon.area
     st.write(f"Area: {area:.2f} square meters")
+
+    # Create DataFrame
+    df = pd.DataFrame(st.session_state["points"], columns=["Latitude", "Longitude"])
+
+    # Scatter plot
+    fig_scatter = px.scatter(df, x="Longitude", y="Latitude", title="Scatter Plot of Points")
+    st.plotly_chart(fig_scatter)
+
+    # Line plot (assuming a path or order of points)
+    fig_line = px.line(df, x="Longitude", y="Latitude", title="Line Plot of Points")
+    st.plotly_chart(fig_line)
+
+    # Area plot (showing cumulative area if needed)
+    df["Index"] = range(len(df))
+    fig_area = px.area(df, x="Index", y=["Latitude", "Longitude"], title="Area Plot of Points")
+    st.plotly_chart(fig_area)
