@@ -5,12 +5,43 @@ from shapely.geometry import Polygon
 import pandas as pd
 import plotly.express as px
 
-# Incluir o CSS personalizado
-def local_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# Incluir o CSS diretamente no código
+css = """
+<style>
+body {
+    background-color: #f0f2f6;
+}
 
-local_css("styles.css")
+.stApp {
+    background-color: #f0f2f6;
+}
+
+.stButton>button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.stButton>button:hover {
+    background-color: white;
+    color: black;
+    border: 2px solid #4CAF50;
+}
+
+.stTitle {
+    color: #4CAF50;
+}
+</style>
+"""
+st.markdown(css, unsafe_allow_html=True)
 
 st.title("Map Area Measurement App")
 
