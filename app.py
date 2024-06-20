@@ -1,7 +1,7 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-from shapely.geometry import Polygon, Point
+from shapely.geometry import Polygon
 import pandas as pd
 import plotly.express as px
 from fpdf import FPDF
@@ -16,7 +16,7 @@ def local_css(file_name):
 
 local_css("styles.css")
 
-st.title("Map Area Measurement App")
+st.title("Fields Area Measure Clone")
 
 # Inicializar o mapa
 m = folium.Map(location=[-23.5505, -46.6333], zoom_start=12)
@@ -35,7 +35,7 @@ def load_points(filename):
 class PDF(FPDF):
     def header(self):
         self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'Map Area Measurement Report', 0, 1, 'C')
+        self.cell(0, 10, 'Fields Area Measurement Report', 0, 1, 'C')
 
     def chapter_title(self, title):
         self.set_font('Arial', 'B', 12)
