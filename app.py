@@ -6,8 +6,10 @@ import pandas as pd
 import plotly.express as px
 from fpdf import FPDF
 import json
+import xml.etree.ElementTree as ET
+from io import StringIO
 
-# Função para incluir o CSS personalizado
+# Incluir o CSS personalizado
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
@@ -46,6 +48,18 @@ class PDF(FPDF):
         self.ln()
 
 pdf = PDF()
+
+# Função para carregar pontos de um arquivo KML
+def load_kml(kml_file):
+    tree = ET.parse(kml_file)
+    root = tree.getroot()
+    namespace = {'kml': 'http://www.opengis.net/kml/2.2'}
+    points = []
+    for placemark in root.findall('.//kml:Placemark', namespace):
+        coordinates = placemark.find('.//kml:coordinates', namespace).text.strip()
+        lon, lat, _ = map(float, coordinates.split(','))
+        points.append((lat, lon))
+    return points
 
 # Função para manipular cliques no mapa
 if "points" not in st.session_state:
@@ -100,6 +114,13 @@ if st.button("Save Points"):
 if st.button("Load Points"):
     st.session_state["points"] = load_points("points.json")
     st.success("Points loaded successfully.")
+
+# Opção para importar KML
+uploaded_file = st.file_uploader("Choose a KML file", type="kml")
+if uploaded_file is not None:
+    kml_points = load_kml(uploaded_file)
+    st.session_state["points"].extend(kml_points)
+    st.success("KML file loaded successfully.")
 
 # Opção para exportar para PDF
 if st.button("Export to PDF"):
