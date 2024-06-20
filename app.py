@@ -8,8 +8,7 @@ from fpdf import FPDF
 import json
 import xml.etree.ElementTree as ET
 from geopy.distance import geodesic
-import geopandas as gpd
-from folium.plugins import Draw
+import simplekml
 
 # Incluir o CSS personalizado
 def local_css(file_name):
@@ -24,7 +23,7 @@ st.title("Fields Area Measure Clone")
 m = folium.Map(location=[-23.5505, -46.6333], zoom_start=12)
 
 # Adicionar funcionalidade de desenho no mapa
-draw = Draw(export=True)
+draw = folium.plugins.Draw(export=True)
 draw.add_to(m)
 
 # Função para salvar os pontos em um arquivo JSON
@@ -57,20 +56,19 @@ pdf = PDF()
 
 # Função para carregar pontos de um arquivo KML
 def load_kml(kml_file):
-    tree = ET.parse(kml_file)
-    root = tree.getroot()
-    namespace = {'kml': 'http://www.opengis.net/kml/2.2'}
+    kml = simplekml.Kml()
+    kml.from_string(kml_file.read())
     points = []
-    for placemark in root.findall('.//kml:Placemark', namespace):
-        coordinates = placemark.find('.//kml:coordinates', namespace).text.strip()
-        lon, lat, _ = map(float, coordinates.split(','))
-        points.append((lat, lon))
+    for placemark in kml.features():
+        for coord in placemark.geometry.coords:
+            points.append((coord[1], coord[0]))  # latitude, longitude
     return points
 
 # Função para adicionar KML ao mapa
 def add_kml_to_map(kml_file, folium_map):
-    gdf = gpd.read_file(kml_file)
-    folium.GeoJson(gdf).add_to(folium_map)
+    points = load_kml(kml_file)
+    for point in points:
+        folium.Marker(location=point).add_to(folium_map)
 
 # Função para calcular a distância entre dois pontos
 def calculate_distance(point1, point2):
