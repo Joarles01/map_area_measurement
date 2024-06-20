@@ -1,13 +1,15 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, Point
 import pandas as pd
 import plotly.express as px
 from fpdf import FPDF
 import json
 import xml.etree.ElementTree as ET
 from geopy.distance import geodesic
+import geopandas as gpd
+from folium.plugins import Draw
 
 # Incluir o CSS personalizado
 def local_css(file_name):
@@ -20,6 +22,10 @@ st.title("Fields Area Measure Clone")
 
 # Inicializar o mapa
 m = folium.Map(location=[-23.5505, -46.6333], zoom_start=12)
+
+# Adicionar funcionalidade de desenho no mapa
+draw = Draw(export=True)
+draw.add_to(m)
 
 # Função para salvar os pontos em um arquivo JSON
 def save_points(points, filename):
@@ -61,6 +67,11 @@ def load_kml(kml_file):
         points.append((lat, lon))
     return points
 
+# Função para adicionar KML ao mapa
+def add_kml_to_map(kml_file, folium_map):
+    gdf = gpd.read_file(kml_file)
+    folium.GeoJson(gdf).add_to(folium_map)
+
 # Função para calcular a distância entre dois pontos
 def calculate_distance(point1, point2):
     return geodesic(point1, point2).meters
@@ -69,6 +80,10 @@ def calculate_distance(point1, point2):
 if "points" not in st.session_state:
     st.session_state["points"] = []
 
+# Adicionar marcadores para cada ponto
+for point in st.session_state["points"]:
+    folium.Marker(location=point).add_to(m)
+
 st.write("Click on the map to add points.")
 output = st_folium(m, width=700, height=500)
 
@@ -76,12 +91,7 @@ output = st_folium(m, width=700, height=500)
 if output["last_clicked"] is not None:
     lat, lon = output["last_clicked"]["lat"], output["last_clicked"]["lng"]
     st.session_state["points"].append((lat, lon))
-
-# Adicionar marcadores para cada ponto
-for point in st.session_state["points"]:
-    folium.Marker(location=point).add_to(m)
-
-st_folium(m, width=700, height=500)
+    folium.Marker(location=(lat, lon)).add_to(m)
 
 # Entrada para o nome do mapa
 map_name = st.text_input("Map Name")
@@ -135,6 +145,7 @@ uploaded_file = st.file_uploader("Choose a KML file", type="kml")
 if uploaded_file is not None:
     kml_points = load_kml(uploaded_file)
     st.session_state["points"].extend(kml_points)
+    add_kml_to_map(uploaded_file, m)
     st.success("KML file loaded successfully.")
 
 # Opção para exportar para PDF
