@@ -1,9 +1,11 @@
 body {
-    background-color: #f0f2f6;
+    background-color: #000000;
+    color: #ffffff;
 }
 
 .stApp {
-    background-color: #f0f2f6;
+    background-color: #000000;
+    color: #ffffff;
 }
 
 .stButton>button {
