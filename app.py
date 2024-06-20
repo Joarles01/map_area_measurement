@@ -9,6 +9,7 @@ import json
 import xml.etree.ElementTree as ET
 from geopy.distance import geodesic
 import simplekml
+from io import BytesIO
 
 # Incluir o CSS personalizado
 def local_css(file_name):
@@ -57,11 +58,12 @@ pdf = PDF()
 # Função para carregar pontos de um arquivo KML
 def load_kml(kml_file):
     kml = simplekml.Kml()
-    kml.from_string(kml_file.read())
+    kml.from_string(kml_file.getvalue().decode("utf-8"))
     points = []
     for placemark in kml.features():
-        for coord in placemark.geometry.coords:
-            points.append((coord[1], coord[0]))  # latitude, longitude
+        if hasattr(placemark.geometry, 'coords'):
+            for coord in placemark.geometry.coords:
+                points.append((coord[1], coord[0]))  # latitude, longitude
     return points
 
 # Função para adicionar KML ao mapa
